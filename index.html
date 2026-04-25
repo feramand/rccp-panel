@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Capacidad — Prensas Offset</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f1117;--bg2:#181c27;--bg3:#1e2333;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#e8eaf0;--text2:#8b90a0;--text3:#555b6e;
+  --green:#1D9E75;--greenl:#5DCAA5;
+  --amber:#BA7517;--amberl:#EF9F27;
+  --red:#E24B4A;--gray:#555b6e;--accent:#534AB7;
+  --s1:#534AB7;--s2:#378ADD;--s3:#1D9E75;
+}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;}
+.app{display:grid;grid-template-rows:52px 40px 1fr;height:100vh;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:0.5px solid var(--border2);background:var(--bg2);}
+.logo{font-size:12px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;}
+.legend{display:flex;gap:12px;align-items:center;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text2);}
+.leg-dot{width:9px;height:9px;border-radius:2px;}
+.tbtn{font-size:11px;padding:4px 12px;background:var(--bg3);border:0.5px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;}
+.tbtn:hover{background:var(--border);}
+.ts{font-size:11px;color:var(--text3);}
+.tabbar{display:flex;align-items:center;background:var(--bg2);border-bottom:0.5px solid var(--border2);padding:0 20px;gap:4px;}
+.tab{font-size:11px;font-weight:500;padding:0 16px;height:40px;display:flex;align-items:center;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;white-space:nowrap;}
+.tab:hover{color:var(--text2);}
+.tab.active{color:var(--text);}
+.tab.s1.active{border-bottom-color:var(--s1);}
+.tab.s2.active{border-bottom-color:var(--s2);}
+.tab.s3.active{border-bottom-color:var(--s3);}
+.tab.sr.active{border-bottom-color:var(--amberl);}
+.panels{overflow:hidden;display:grid;grid-template-columns:1fr;}
+.wpanel{display:none;grid-template-columns:252px 1fr;height:100%;overflow:hidden;}
+.wpanel.active{display:grid;}
+.sidebar{background:var(--bg2);border-right:0.5px solid var(--border);overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;}
+.sec-title{font-size:9px;font-weight:600;letter-spacing:0.09em;color:var(--text3);text-transform:uppercase;padding-bottom:4px;border-bottom:0.5px solid var(--border);margin-bottom:2px;}
+.psec{display:flex;flex-direction:column;gap:6px;}
+.field{display:flex;flex-direction:column;gap:3px;}
+.field label{font-size:10px;color:var(--text2);}
+.field input{background:var(--bg3);border:0.5px solid var(--border2);border-radius:5px;color:var(--text);font-size:12px;padding:6px 8px;width:100%;outline:none;}
+.field input:focus{border-color:var(--accent);}
+.mblock{background:var(--bg3);border:0.5px solid var(--border);border-radius:7px;padding:8px;display:flex;flex-direction:column;gap:5px;margin-bottom:6px;}
+.mbhead{display:flex;justify-content:space-between;align-items:center;}
+.mbid{font-size:12px;font-weight:600;}
+.mbadge{font-size:9px;padding:2px 6px;border-radius:10px;font-weight:500;}
+.b11{background:rgba(83,74,183,0.25);color:#9b95e8;}
+.b44{background:rgba(55,138,221,0.2);color:#6db3f2;}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.mf{display:flex;flex-direction:column;gap:2px;}
+.mf label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;}
+.mf input{background:var(--bg2);border:0.5px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;padding:4px 6px;width:100%;outline:none;}
+.mf input:focus{border-color:var(--accent);}
+.urow{display:flex;align-items:center;gap:5px;}
+.urow input[type=checkbox]{accent-color:var(--red);width:11px;height:11px;}
+.urow label{font-size:9px;color:var(--text2);cursor:pointer;}
+.pbadge{font-size:9px;color:var(--text3);background:var(--bg2);border:0.5px solid var(--border);border-radius:3px;padding:1px 5px;}
+.content{overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;}
+.srow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.metric{background:var(--bg2);border:0.5px solid var(--border);border-radius:9px;padding:12px 14px;}
+.mlabel{font-size:9px;font-weight:600;letter-spacing:0.07em;color:var(--text3);text-transform:uppercase;margin-bottom:5px;}
+.mvalue{font-size:24px;font-weight:600;color:var(--text);line-height:1;}
+.msub{font-size:9px;color:var(--text3);margin-top:3px;}
+.mvalue.green{color:var(--greenl);}
+.mvalue.amber{color:var(--amberl);}
+.mvalue.red{color:var(--red);}
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.bcard{background:var(--bg2);border:0.5px solid var(--border);border-radius:9px;padding:14px 16px;}
+.btitle{font-size:10px;font-weight:600;letter-spacing:0.06em;color:var(--text3);text-transform:uppercase;margin-bottom:10px;}
+.brows{display:flex;flex-direction:column;gap:6px;}
+.brow{display:flex;justify-content:space-between;align-items:center;font-size:12px;}
+.brow .bl{color:var(--text2);}
+.brow .bv{font-weight:500;}
+.bdiv{border:none;border-top:0.5px solid var(--border);margin:8px 0;}
+.bres{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:600;}
+.bres .bl{color:var(--text2);}
+.ociosa{color:var(--greenl);}
+.insatisfecha{color:var(--red);}
+.neutra{color:var(--text);}
+.glabel{font-size:9px;font-weight:600;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px;}
+.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.mcard{background:var(--bg2);border:0.5px solid var(--border);border-radius:11px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.mcard.overloaded{border-color:rgba(226,75,74,0.45);}
+.mcard.highload{border-color:rgba(186,117,23,0.45);}
+.mcard.unavailable{opacity:0.38;}
+.mcard.idle{border-color:rgba(85,91,110,0.4);}
+.cardhead{display:flex;justify-content:space-between;align-items:center;}
+.cardname{font-size:17px;font-weight:700;letter-spacing:0.02em;}
+.cardtype{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500;}
+.cardinfo{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);}
+.cardinfo span{color:var(--text);font-weight:500;}
+.barwrap{position:relative;width:100%;height:32px;background:var(--bg3);border-radius:7px;overflow:hidden;}
+.barfill{height:100%;transition:width 0.5s cubic-bezier(.4,0,.2,1);}
+.barlbl{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:600;color:rgba(255,255,255,0.9);white-space:nowrap;}
+.barout{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:600;color:var(--text2);}
+.trow{display:flex;gap:5px;}
+.tpill{flex:1;text-align:center;font-size:9px;font-weight:600;padding:4px 0;border-radius:4px;}
+.ta{background:rgba(83,74,183,0.2);color:#9b95e8;}
+.tb{background:rgba(55,138,221,0.2);color:#6db3f2;}
+.tc{background:rgba(29,158,117,0.2);color:var(--greenl);}
+.t0{background:var(--bg3);color:var(--text3);}
+.resumen-panel{display:none;flex-direction:column;gap:16px;padding:20px;overflow-y:auto;}
+.resumen-panel.active{display:flex;}
+.rtable{width:100%;border-collapse:collapse;font-size:12px;}
+.rtable th{font-size:9px;font-weight:600;letter-spacing:0.07em;color:var(--text3);text-transform:uppercase;padding:8px 12px;text-align:left;border-bottom:0.5px solid var(--border2);}
+.rtable td{padding:10px 12px;border-bottom:0.5px solid var(--border);color:var(--text2);}
+.rtable td.bold{color:var(--text);font-weight:500;}
+.rtable tr:last-child td{border-bottom:none;}
+.s1c{color:var(--s1);}
+.s2c{color:var(--s2);}
+.s3c{color:var(--s3);}
+.pill-ok{background:rgba(29,158,117,0.15);color:var(--greenl);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.pill-warn{background:rgba(186,117,23,0.15);color:var(--amberl);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.pill-bad{background:rgba(226,75,74,0.15);color:var(--red);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.rcard{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:16px;overflow:auto;}
+.rcardtitle{font-size:10px;font-weight:600;letter-spacing:0.07em;color:var(--text3);text-transform:uppercase;margin-bottom:12px;}
+.sparkrow{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.sparkname{width:36px;font-size:11px;color:var(--text2);}
+.sparkbar-wrap{flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden;position:relative;}
+.sparkbar-fill{height:100%;border-radius:4px;}
+.sparkpct{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:600;color:var(--text2);}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:28px;display:flex;flex-direction:column;gap:16px;}
+.modal-title{font-size:14px;font-weight:600;color:var(--text);}
+.modal-sub{font-size:12px;color:var(--text2);}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+#toast{display:none;position:fixed;bottom:20px;right:20px;background:var(--accent);color:#fff;font-size:12px;padding:10px 16px;border-radius:8px;z-index:9999;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <span class="logo">Capacidad · Prensas Offset</span>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="legend">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--green);"></div>Normal &lt;80%</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--amber);"></div>Alta 80–99%</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--red);"></div>Sobrecarga ≥100%</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--gray);"></div>No disponible</div>
+      </div>
+      <button class="tbtn" id="btn-cargar">📂 Cargar</button>
+      <button class="tbtn" id="btn-guardar-open">💾 Guardar</button>
+      <button class="tbtn" onclick="window.compartir()">🔗 Link</button>
+      <button class="tbtn" onclick="window.print()">🖨 PDF</button>
+      <span class="ts" id="clock"></span>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab sr active" id="tab3">📊 Resumen</div>
+    <div class="tab s1" id="tab0">Semana 1</div>
+    <div class="tab s2" id="tab1">Semana 2</div>
+    <div class="tab s3" id="tab2">Semana 3</div>
+  </div>
+
+  <div class="panels" id="panels-container">
+    <div class="resumen-panel active" id="resumen-panel">
+      <div class="rcard"><div class="rcardtitle">Comparativo — Grupo 1/1</div><table class="rtable" id="rtable-11"></table></div>
+      <div class="rcard"><div class="rcardtitle">Comparativo — Grupo 4/4</div><table class="rtable" id="rtable-44"></table></div>
+      <div class="rcard"><div class="rcardtitle">Utilización por máquina</div><div id="sparks"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Modal Guardar -->
+<div class="modal-overlay" id="modal-guardar">
+  <div class="modal-box" style="width:340px;">
+    <div class="modal-title">Guardar evaluación</div>
+    <div class="modal-sub">Ingresa tu nombre para registrar quién guardó esta evaluación.</div>
+    <div class="field"><label>Tu nombre</label><input type="text" id="input-nombre" placeholder="Ej: Juan Pérez"></div>
+    <div class="modal-actions">
+      <button class="tbtn" id="btn-guardar-cancel">Cancelar</button>
+      <button id="btn-guardar-confirm" style="font-size:12px;padding:7px 16px;background:var(--accent);border:none;color:#fff;border-radius:6px;cursor:pointer;font-weight:500;">Guardar</button>
+    </div>
+    <div id="guardar-msg" style="font-size:11px;text-align:center;display:none;"></div>
+  </div>
+</div>
+
+<!-- Modal Historial -->
+<div class="modal-overlay" id="modal-historial">
+  <div class="modal-box" style="width:520px;">
+    <div class="modal-title">Cargar evaluación</div>
+    <div class="modal-sub">Selecciona una evaluación guardada para cargarla en el panel.</div>
+    <div id="historial-loading" style="font-size:12px;color:var(--text3);text-align:center;padding:16px 0;">Cargando evaluaciones...</div>
+    <div id="historial-list" style="max-height:320px;overflow-y:auto;display:none;flex-direction:column;gap:6px;"></div>
+    <div id="historial-error" style="display:none;font-size:11px;color:var(--red);text-align:center;"></div>
+    <div class="modal-actions"><button class="tbtn" id="btn-historial-cancel">Cerrar</button></div>
+  </div>
+</div>
+
+<script>
+var FLOW_SAVE = "https://defaultb05f7ea406ee42f88def777420fbe8.43.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/47cc5ab863ef4cb9a78d5c26f1348b57/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=B8AXV8Z2pyIxmtb56qQWEmGnaJulmiG0Maqkyw6gUxw";
+var FLOW_READ = "https://defaultb05f7ea406ee42f88def777420fbe8.43.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d4649237991c446eacfa07690f724131/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=pC3cOruIDxS06PVVYgnob9odg3H-19IlnmZLCDytAnc";
+
+var MACHINES = [
+  {id:'2P1',type:'1/1',prio:1},{id:'2P2',type:'1/1',prio:2},{id:'4P',type:'1/1',prio:3},
+  {id:'KBA',type:'4/4',prio:1},{id:'XL',type:'4/4',prio:2},{id:'10P',type:'4/4',prio:3}
+];
+var WEEKS = [0,1,2];
+var activeTab = 3;
+
+// ── TAB SWITCHING ──────────────────────────────────────
+function switchTab(t) {
+  activeTab = t;
+  for (var i = 0; i < 3; i++) {
+    var p = document.getElementById('wpanel-'+i);
+    if (p) p.className = 'wpanel' + (i === t ? ' active' : '');
+    document.getElementById('tab'+i).className = 'tab s'+(i+1)+(i === t ? ' active' : '');
+  }
+  var rp = document.getElementById('resumen-panel');
+  rp.className = 'resumen-panel' + (t === 3 ? ' active' : '');
+  document.getElementById('tab3').className = 'tab sr' + (t === 3 ? ' active' : '');
+  if (t === 3) buildResumen();
+}
+
+document.getElementById('tab3').onclick = function(){ switchTab(3); };
+document.getElementById('tab0').onclick = function(){ switchTab(0); };
+document.getElementById('tab1').onclick = function(){ switchTab(1); };
+document.getElementById('tab2').onclick = function(){ switchTab(2); };
+
+// ── BUILD WEEK PANELS ──────────────────────────────────
+function buildWeekPanel(w) {
+  var panel = document.createElement('div');
+  panel.className = 'wpanel';
+  panel.id = 'wpanel-'+w;
+
+  var sb = document.createElement('div');
+  sb.className = 'sidebar';
+
+  var semInput = '<input type="number" id="w'+w+'-semana" min="1" max="52" placeholder="'+(18+w)+'">';
+  var globalHTML = '<div class="psec"><div class="sec-title">Semana '+(w+1)+'</div>'
+    +'<div class="field"><label>N° de semana</label>'+semInput+'</div>'
+    +'<div class="field"><label>Demanda 1/1 (pliegos)</label><input type="number" id="w'+w+'-dem11" min="0" placeholder="0"></div>'
+    +'<div class="field"><label>Demanda 4/4 (pliegos)</label><input type="number" id="w'+w+'-dem44" min="0" placeholder="0"></div>'
+    +'<div class="field"><label>Horas por turno</label><input type="number" id="w'+w+'-hrs" min="1" max="24" value="8"></div>'
+    +'</div>'
+    +'<div class="psec"><div class="sec-title">Asignación especial 4/4</div>'
+    +'<div class="field"><label>KBA — fija (pliegos)</label><input type="number" id="w'+w+'-esp-KBA" min="0" placeholder="0"></div>'
+    +'<div class="field"><label>XL — fija (pliegos)</label><input type="number" id="w'+w+'-esp-XL" min="0" placeholder="0"></div>'
+    +'<div class="field"><label>10P — fija (pliegos)</label><input type="number" id="w'+w+'-esp-10P" min="0" placeholder="0"></div>'
+    +'</div>';
+  sb.innerHTML = globalHTML;
+
+  ['1/1','4/4'].forEach(function(tipo) {
+    var sec = document.createElement('div');
+    sec.className = 'psec';
+    sec.innerHTML = '<div class="sec-title">'+(tipo==='1/1'?'Máquinas 1/1':'Máquinas 4/4')+'</div>';
+    MACHINES.filter(function(m){return m.type===tipo;}).forEach(function(m) {
+      var bc = tipo==='1/1'?'b11':'b44';
+      var mb = document.createElement('div');
+      mb.className = 'mblock';
+      mb.innerHTML = '<div class="mbhead"><span class="mbid">'+m.id+'</span>'
+        +'<div style="display:flex;gap:5px;align-items:center;"><span class="pbadge">P'+m.prio+'</span><span class="mbadge '+bc+'">'+m.type+'</span></div></div>'
+        +'<div class="mgrid">'
+        +'<div class="mf" style="grid-column:1/-1"><label>Vel. MRD (pli/hr)</label><input type="number" id="w'+w+'-mrd-'+m.id+'" placeholder="0" min="0"></div>'
+        +'<div class="mf"><label>Turno A (días)</label><input type="number" id="w'+w+'-ta-'+m.id+'" placeholder="0" min="0" max="7"></div>'
+        +'<div class="mf"><label>Turno B (días)</label><input type="number" id="w'+w+'-tb-'+m.id+'" placeholder="0" min="0" max="7"></div>'
+        +'<div class="mf" style="grid-column:1/-1"><label>Turno C (días)</label><input type="number" id="w'+w+'-tc-'+m.id+'" placeholder="0" min="0" max="7"></div>'
+        +'</div>'
+        +'<div class="urow"><input type="checkbox" id="w'+w+'-unavail-'+m.id+'">'
+        +'<label for="w'+w+'-unavail-'+m.id+'">Máquina no disponible</label></div>';
+      sec.appendChild(mb);
+    });
+    sb.appendChild(sec);
+  });
+  panel.appendChild(sb);
+
+  var ct = document.createElement('div');
+  ct.className = 'content';
+  ct.innerHTML = '<div class="srow">'
+    +'<div class="metric"><div class="mlabel">Cap. total 1/1</div><div class="mvalue" id="w'+w+'-s-cap11">—</div><div class="msub">pliegos / semana</div></div>'
+    +'<div class="metric"><div class="mlabel">Cap. total 4/4</div><div class="mvalue" id="w'+w+'-s-cap44">—</div><div class="msub">pliegos / semana</div></div>'
+    +'<div class="metric"><div class="mlabel">Utilización 1/1</div><div class="mvalue" id="w'+w+'-s-util11">—</div><div class="msub">demanda vs. capacidad</div></div>'
+    +'<div class="metric"><div class="mlabel">Utilización 4/4</div><div class="mvalue" id="w'+w+'-s-util44">—</div><div class="msub">demanda vs. capacidad</div></div>'
+    +'<div class="metric"><div class="mlabel">Máquinas activas</div><div class="mvalue" id="w'+w+'-s-active">—</div><div class="msub">de 6 disponibles</div></div>'
+    +'</div>'
+    +'<div class="bgrid">'
+    +'<div class="bcard"><div class="btitle">Balance 1/1 — 2P1 · 2P2 · 4P</div><div class="brows" id="w'+w+'-bal-rows-11"></div><hr class="bdiv"><div class="bres"><span class="bl" id="w'+w+'-bal-lbl-11">—</span><span id="w'+w+'-bal-val-11" class="neutra">—</span></div></div>'
+    +'<div class="bcard"><div class="btitle">Balance 4/4 — KBA · XL · 10P</div><div class="brows" id="w'+w+'-bal-rows-44"></div><hr class="bdiv"><div class="bres"><span class="bl" id="w'+w+'-bal-lbl-44">—</span><span id="w'+w+'-bal-val-44" class="neutra">—</span></div></div>'
+    +'</div>'
+    +'<div><div class="glabel">Grupo 1/1 · Prioridad: 2P1 → 2P2 → 4P</div><div class="cgrid" id="w'+w+'-grid-11"></div></div>'
+    +'<div><div class="glabel">Grupo 4/4 · Prioridad: KBA → XL → 10P</div><div class="cgrid" id="w'+w+'-grid-44"></div></div>';
+  panel.appendChild(ct);
+
+  MACHINES.forEach(function(m) {
+    var is11 = m.type==='1/1';
+    var bc = is11?'b11':'b44';
+    var grid = ct.querySelector('#w'+w+'-grid-'+(is11?'11':'44'));
+    var card = document.createElement('div');
+    card.className = 'mcard';
+    card.id = 'w'+w+'-mcard-'+m.id;
+    card.innerHTML = '<div class="cardhead"><span class="cardname">'+m.id+'</span>'
+      +'<div style="display:flex;gap:6px;align-items:center;"><span style="font-size:10px;color:var(--text3);">P'+m.prio+'</span><span class="cardtype '+bc+'">'+m.type+'</span></div></div>'
+      +'<div class="barwrap"><div class="barfill" id="w'+w+'-bar-'+m.id+'" style="width:0%;"></div>'
+      +'<span class="barlbl" id="w'+w+'-barin-'+m.id+'"></span>'
+      +'<span class="barout" id="w'+w+'-barout-'+m.id+'">0%</span></div>'
+      +'<div class="cardinfo"><span>Cap: <span id="w'+w+'-capval-'+m.id+'">—</span> pli</span><span>Asig: <span id="w'+w+'-asigval-'+m.id+'">—</span> pli</span></div>'
+      +'<div class="trow" id="w'+w+'-trow-'+m.id+'"><div class="tpill t0">A:—</div><div class="tpill t0">B:—</div><div class="tpill t0">C:—</div></div>';
+    grid.appendChild(card);
+  });
+
+  document.getElementById('panels-container').insertBefore(panel, document.getElementById('resumen-panel'));
+
+  // Attach input listeners
+  var allInputs = sb.querySelectorAll('input');
+  allInputs.forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      if (inp.id === 'w0-semana') syncWeekNumbers(inp.value);
+      calcWeek(w);
+    });
+    inp.addEventListener('change', function() {
+      calcWeek(w);
+    });
+  });
+  var allChecks = sb.querySelectorAll('input[type=checkbox]');
+  allChecks.forEach(function(chk) {
+    chk.addEventListener('change', function(){ calcWeek(w); });
+  });
+  var ctInputs = ct.querySelectorAll('input');
+  ctInputs.forEach(function(inp) {
+    inp.addEventListener('input', function(){ calcWeek(w); });
+  });
+}
+
+// ── HELPERS ────────────────────────────────────────────
+function gv(id) { var e=document.getElementById(id); return e?(parseFloat(e.value)||0):0; }
+function isUn(w,mid) { var c=document.getElementById('w'+w+'-unavail-'+mid); return c&&c.checked; }
+function getCap(w,mid) {
+  if(isUn(w,mid)) return 0;
+  var mrd=gv('w'+w+'-mrd-'+mid),ta=gv('w'+w+'-ta-'+mid),tb=gv('w'+w+'-tb-'+mid),tc=gv('w'+w+'-tc-'+mid),hrs=gv('w'+w+'-hrs')||8;
+  return Math.round(mrd*(ta+tb+tc)*hrs);
+}
+function distrib(w,machines,demanda) {
+  var espMap={},capEfMap={};
+  machines.forEach(function(m){
+    var cap=getCap(w,m.id);
+    var e=Math.min(gv('w'+w+'-esp-'+m.id)||0,cap);
+    espMap[m.id]=e; capEfMap[m.id]=Math.max(0,cap-e);
+  });
+  var totalEsp=0; machines.forEach(function(m){totalEsp+=espMap[m.id];});
+  var libre=Math.max(0,demanda-totalEsp);
+  var dm={};
+  machines.forEach(function(m){
+    var cap=getCap(w,m.id);
+    var al=Math.min(capEfMap[m.id],libre);
+    libre=Math.max(0,libre-al);
+    dm[m.id]={cap:cap,esp:espMap[m.id],asig:espMap[m.id]+al};
+  });
+  return {dm:dm,restante:libre};
+}
+function colorPct(pct) {
+  if(pct>=100) return 'var(--red)';
+  if(pct>=80) return 'var(--amber)';
+  if(pct>0) return 'var(--green)';
+  return 'var(--gray)';
+}
+function syncWeekNumbers(val) {
+  for(var i=1;i<3;i++){
+    var el=document.getElementById('w'+i+'-semana');
+    if(el){ el.value=(val!==''&&!isNaN(val))?(parseInt(val)+i):''; calcWeek(i); }
+  }
+}
+
+// ── CALC WEEK ──────────────────────────────────────────
+function calcWeek(w) {
+  var sem=document.getElementById('w'+w+'-semana').value;
+  document.getElementById('tab'+w).textContent=sem?'Semana '+sem:'Semana '+(w+1);
+  var dem11=gv('w'+w+'-dem11'),dem44=gv('w'+w+'-dem44');
+  var m11=MACHINES.filter(function(m){return m.type==='1/1';});
+  var m44=MACHINES.filter(function(m){return m.type==='4/4';});
+  var d11=distrib(w,m11,dem11), d44=distrib(w,m44,dem44);
+  var cap11=0,cap44=0,active=0;
+  MACHINES.forEach(function(m){
+    var cap=getCap(w,m.id);
+    if(!isUn(w,m.id)) active++;
+    if(m.type==='1/1') cap11+=cap; else cap44+=cap;
+  });
+  MACHINES.forEach(function(m){
+    var info=(m.type==='1/1'?d11:d44).dm[m.id];
+    var cap=info.cap,asig=info.asig,esp=info.esp;
+    var unavail=isUn(w,m.id);
+    var pct=cap>0?Math.round(asig/cap*100):0;
+    var clamped=Math.min(pct,100);
+    var color=unavail?'var(--gray)':colorPct(pct);
+    var bar=document.getElementById('w'+w+'-bar-'+m.id);
+    var barin=document.getElementById('w'+w+'-barin-'+m.id);
+    var barout=document.getElementById('w'+w+'-barout-'+m.id);
+    bar.style.width=clamped+'%'; bar.style.background=color;
+    if(clamped>20){barin.textContent=pct+'%';barout.textContent='';}
+    else{barin.textContent='';barout.textContent=pct+'%';}
+    document.getElementById('w'+w+'-capval-'+m.id).textContent=unavail?'—':cap.toLocaleString('es-CL');
+    document.getElementById('w'+w+'-asigval-'+m.id).textContent=unavail?'—':asig.toLocaleString('es-CL')+(esp>0?' ('+esp.toLocaleString('es-CL')+' fijo)':'');
+    var card=document.getElementById('w'+w+'-mcard-'+m.id);
+    card.className='mcard'+(unavail?' unavailable':pct>=100?' overloaded':pct>=80?' highload':pct===0?' idle':'');
+    var ta=Math.round(gv('w'+w+'-ta-'+m.id)),tb=Math.round(gv('w'+w+'-tb-'+m.id)),tc=Math.round(gv('w'+w+'-tc-'+m.id));
+    document.getElementById('w'+w+'-trow-'+m.id).innerHTML=
+      '<div class="tpill '+(ta>0?'ta':'t0')+'">A:'+ta+'d</div>'
+      +'<div class="tpill '+(tb>0?'tb':'t0')+'">B:'+tb+'d</div>'
+      +'<div class="tpill '+(tc>0?'tc':'t0')+'">C:'+tc+'d</div>';
+  });
+  document.getElementById('w'+w+'-s-cap11').textContent=cap11.toLocaleString('es-CL');
+  document.getElementById('w'+w+'-s-cap44').textContent=cap44.toLocaleString('es-CL');
+  document.getElementById('w'+w+'-s-active').textContent=active+' / 6';
+  var u11=cap11>0&&dem11>0?Math.round(dem11/cap11*100):null;
+  var u44=cap44>0&&dem44>0?Math.round(dem44/cap44*100):null;
+  var e11=document.getElementById('w'+w+'-s-util11');
+  e11.textContent=u11!==null?u11+'%':'—';
+  e11.className='mvalue'+(u11===null?'':u11>=100?' red':u11>=80?' amber':' green');
+  var e44=document.getElementById('w'+w+'-s-util44');
+  e44.textContent=u44!==null?u44+'%':'—';
+  e44.className='mvalue'+(u44===null?'':u44>=100?' red':u44>=80?' amber':' green');
+  updateBalance(w,'11',m11,d11.dm,dem11,cap11,d11.restante);
+  updateBalance(w,'44',m44,d44.dm,dem44,cap44,d44.restante);
+  if(activeTab===3) buildResumen();
+}
+
+function updateBalance(w,suf,machines,dm,dem,capTotal,restante){
+  var rows=document.getElementById('w'+w+'-bal-rows-'+suf);
+  rows.innerHTML='';
+  addBRow(rows,'Demanda',dem.toLocaleString('es-CL')+' pli','');
+  machines.forEach(function(m){
+    var info=dm[m.id],cap=info.cap,asig=info.asig,esp=info.esp;
+    var unavail=isUn(w,m.id);
+    var pct=cap>0?Math.round(asig/cap*100):0;
+    var color=unavail?'var(--gray)':colorPct(pct);
+    var espTxt=esp>0?' <span style="color:var(--amberl);font-size:9px;">('+esp.toLocaleString('es-CL')+' fijo)</span>':'';
+    addBRow(rows,m.id+' <span style="color:var(--text3);font-size:10px;">cap '+cap.toLocaleString('es-CL')+'</span>'+espTxt,asig.toLocaleString('es-CL')+' pli',color);
+  });
+  var lbl=document.getElementById('w'+w+'-bal-lbl-'+suf);
+  var val=document.getElementById('w'+w+'-bal-val-'+suf);
+  if(dem===0){lbl.textContent='Sin demanda ingresada';val.textContent='—';val.className='neutra';return;}
+  if(restante>0){lbl.textContent='Demanda insatisfecha';val.textContent=restante.toLocaleString('es-CL')+' pli';val.className='insatisfecha';}
+  else{
+    var ocio=capTotal-dem;
+    if(ocio>0){lbl.textContent='Capacidad ociosa';val.textContent=ocio.toLocaleString('es-CL')+' pli';val.className='ociosa';}
+    else{lbl.textContent='Capacidad exacta';val.textContent='0 pli';val.className='neutra';}
+  }
+}
+
+function addBRow(container,lbl,val,color){
+  var d=document.createElement('div');
+  d.className='brow';
+  d.innerHTML='<span class="bl">'+lbl+'</span><span class="bv" style="color:'+(color||'var(--text)')+'">'+val+'</span>';
+  container.appendChild(d);
+}
+
+// ── RESUMEN ────────────────────────────────────────────
+function getWeekData(w){
+  var m11=MACHINES.filter(function(m){return m.type==='1/1';});
+  var m44=MACHINES.filter(function(m){return m.type==='4/4';});
+  var dem11=gv('w'+w+'-dem11'),dem44=gv('w'+w+'-dem44');
+  var d11=distrib(w,m11,dem11),d44=distrib(w,m44,dem44);
+  var cap11=0,cap44=0;
+  MACHINES.forEach(function(m){var c=getCap(w,m.id);if(m.type==='1/1') cap11+=c; else cap44+=c;});
+  var sem=document.getElementById('w'+w+'-semana').value;
+  return {sem:sem?'S'+sem:'Sem '+(w+1),dem11:dem11,dem44:dem44,cap11:cap11,cap44:cap44,
+    rest11:d11.restante,rest44:d44.restante,dm11:d11.dm,dm44:d44.dm};
+}
+
+function pillHtml(pct){
+  if(pct===null||pct===0) return '<span style="color:var(--text3);">—</span>';
+  var cls=pct>=100?'pill-bad':pct>=80?'pill-warn':'pill-ok';
+  return '<span class="'+cls+'">'+pct+'%</span>';
+}
+
+function balHtml(dem,cap,rest){
+  if(dem===0) return '<span style="color:var(--text3);">—</span>';
+  if(rest>0) return '<span class="pill-bad">-'+rest.toLocaleString('es-CL')+' pli</span>';
+  var ocio=cap-dem;
+  if(ocio>0) return '<span class="pill-ok">+'+ocio.toLocaleString('es-CL')+' pli</span>';
+  return '<span style="color:var(--text2);">Exacto</span>';
+}
+
+function buildResumen(){
+  var data=[getWeekData(0),getWeekData(1),getWeekData(2)];
+  ['11','44'].forEach(function(grp){
+    var t=document.getElementById('rtable-'+grp);
+    var rows=[
+      ['',data[0].sem,data[1].sem,data[2].sem],
+      ['Demanda (pli)',data[0]['dem'+grp].toLocaleString('es-CL'),data[1]['dem'+grp].toLocaleString('es-CL'),data[2]['dem'+grp].toLocaleString('es-CL')],
+      ['Capacidad (pli)',data[0]['cap'+grp].toLocaleString('es-CL'),data[1]['cap'+grp].toLocaleString('es-CL'),data[2]['cap'+grp].toLocaleString('es-CL')],
+      ['Utilización',
+        pillHtml(data[0]['cap'+grp]>0&&data[0]['dem'+grp]>0?Math.round(data[0]['dem'+grp]/data[0]['cap'+grp]*100):null),
+        pillHtml(data[1]['cap'+grp]>0&&data[1]['dem'+grp]>0?Math.round(data[1]['dem'+grp]/data[1]['cap'+grp]*100):null),
+        pillHtml(data[2]['cap'+grp]>0&&data[2]['dem'+grp]>0?Math.round(data[2]['dem'+grp]/data[2]['cap'+grp]*100):null)],
+      ['Balance',
+        balHtml(data[0]['dem'+grp],data[0]['cap'+grp],data[0]['rest'+grp]),
+        balHtml(data[1]['dem'+grp],data[1]['cap'+grp],data[1]['rest'+grp]),
+        balHtml(data[2]['dem'+grp],data[2]['cap'+grp],data[2]['rest'+grp])]
+    ];
+    t.innerHTML='';
+    rows.forEach(function(row,ri){
+      var tr=document.createElement('tr');
+      row.forEach(function(cell,ci){
+        var el=document.createElement(ri===0?'th':'td');
+        el.innerHTML=cell;
+        if(ri>0&&ci===0) el.className='bold';
+        if(ri===0&&ci>0) el.className=['','s1c','s2c','s3c'][ci];
+        tr.appendChild(el);
+      });
+      t.appendChild(tr);
+    });
+  });
+  var sparks=document.getElementById('sparks');
+  sparks.innerHTML='';
+  MACHINES.forEach(function(m){
+    var row=document.createElement('div');
+    row.className='sparkrow';
+    row.innerHTML='<span class="sparkname">'+m.id+'</span>';
+    data.forEach(function(d){
+      var dm=m.type==='1/1'?d.dm11:d.dm44;
+      var info=dm[m.id];
+      var pct=info.cap>0?Math.round(info.asig/info.cap*100):0;
+      var wrap=document.createElement('div');
+      wrap.className='sparkbar-wrap';
+      wrap.innerHTML='<div class="sparkbar-fill" style="width:'+Math.min(pct,100)+'%;background:'+colorPct(pct)+';"></div>'
+        +'<span class="sparkpct">'+pct+'%</span>';
+      row.appendChild(wrap);
+    });
+    sparks.appendChild(row);
+  });
+  var lrow=document.createElement('div');
+  lrow.style.cssText='display:flex;gap:10px;font-size:9px;color:var(--text3);margin-top:4px;';
+  lrow.innerHTML='<span style="width:36px;"></span>';
+  data.forEach(function(d){lrow.innerHTML+='<span style="flex:1;text-align:right;">'+d.sem+'</span>';});
+  sparks.appendChild(lrow);
+}
+
+// ── GUARDAR ────────────────────────────────────────────
+document.getElementById('btn-guardar-open').onclick = function(){
+  document.getElementById('modal-guardar').className='modal-overlay open';
+  document.getElementById('input-nombre').value='';
+  document.getElementById('guardar-msg').style.display='none';
+  document.getElementById('btn-guardar-confirm').disabled=false;
+  document.getElementById('btn-guardar-confirm').textContent='Guardar';
+};
+document.getElementById('btn-guardar-cancel').onclick = function(){
+  document.getElementById('modal-guardar').className='modal-overlay';
+};
+document.getElementById('btn-guardar-confirm').onclick = function(){
+  var nombre=document.getElementById('input-nombre').value.trim();
+  var msg=document.getElementById('guardar-msg');
+  var btn=document.getElementById('btn-guardar-confirm');
+  if(!nombre){msg.style.display='block';msg.style.color='var(--red)';msg.textContent='Por favor ingresa tu nombre.';return;}
+  var s0=getWeekData(0),s1=getWeekData(1),s2=getWeekData(2);
+  function util(dem,cap){return cap>0&&dem>0?Math.round(dem/cap*100):0;}
+  function bal(data,grp){return data['rest'+grp]>0?-data['rest'+grp]:Math.max(0,data['cap'+grp]-data['dem'+grp]);}
+  var payload={
+    guardado_por:nombre,
+    s1_num:gv('w0-semana'),s1_dem11:s0.dem11,s1_dem44:s0.dem44,s1_cap11:s0.cap11,s1_cap44:s0.cap44,
+    s1_util11:util(s0.dem11,s0.cap11),s1_util44:util(s0.dem44,s0.cap44),
+    s1_bal11:bal(s0,'11'),s1_bal44:bal(s0,'44'),
+    s2_num:gv('w1-semana'),s2_dem11:s1.dem11,s2_dem44:s1.dem44,s2_cap11:s1.cap11,s2_cap44:s1.cap44,
+    s2_util11:util(s1.dem11,s1.cap11),s2_util44:util(s1.dem44,s1.cap44),
+    s2_bal11:bal(s1,'11'),s2_bal44:bal(s1,'44'),
+    s3_num:gv('w2-semana'),s3_dem11:s2.dem11,s3_dem44:s2.dem44,s3_cap11:s2.cap11,s3_cap44:s2.cap44,
+    s3_util11:util(s2.dem11,s2.cap11),s3_util44:util(s2.dem44,s2.cap44),
+    s3_bal11:bal(s2,'11'),s3_bal44:bal(s2,'44')
+  };
+  btn.disabled=true; btn.textContent='Guardando...'; msg.style.display='none';
+  fetch(FLOW_SAVE,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+  .then(function(res){
+    if(res.ok||res.status===202){
+      msg.style.display='block';msg.style.color='var(--greenl)';msg.textContent='✓ Guardado correctamente en SharePoint.';
+      btn.textContent='Guardado';
+      setTimeout(function(){document.getElementById('modal-guardar').className='modal-overlay';},2000);
+    } else { throw new Error('Error '+res.status); }
+  })
+  .catch(function(){
+    msg.style.display='block';msg.style.color='var(--red)';msg.textContent='Error al guardar. Intenta de nuevo.';
+    btn.disabled=false;btn.textContent='Reintentar';
+  });
+};
+
+// ── CARGAR ─────────────────────────────────────────────
+document.getElementById('btn-cargar').onclick = function(){
+  document.getElementById('modal-historial').className='modal-overlay open';
+  document.getElementById('historial-loading').style.display='block';
+  document.getElementById('historial-list').style.display='none';
+  document.getElementById('historial-error').style.display='none';
+  fetch(FLOW_READ,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
+  .then(function(res){return res.json();})
+  .then(function(data){
+    var items=data.value||[];
+    document.getElementById('historial-loading').style.display='none';
+    var list=document.getElementById('historial-list');
+    list.innerHTML='';
+    if(items.length===0){
+      list.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:16px;">No hay evaluaciones guardadas.</div>';
+      list.style.display='flex'; return;
+    }
+    items.forEach(function(item){
+      var fecha=item.Fecha_Guardado?new Date(item.Fecha_Guardado).toLocaleString('es-CL'):'—';
+      var por=item.Guardado_Por||'—';
+      var s1n=item.Semana1_Num||item.Title||'—';
+      var s2n=item.Semana2_Num||'—';
+      var s3n=item.Semana3_Num||'—';
+      var card=document.createElement('div');
+      card.style.cssText='background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;';
+      card.onmouseover=function(){this.style.borderColor='var(--accent)';};
+      card.onmouseout=function(){this.style.borderColor='var(--border)';};
+      card.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;">'
+        +'<div style="font-size:12px;font-weight:500;color:var(--text);">S'+s1n+' · S'+s2n+' · S'+s3n+'</div>'
+        +'<div style="font-size:10px;color:var(--accent);font-weight:600;">Cargar →</div>'
+        +'</div>'
+        +'<div style="font-size:10px;color:var(--text3);margin-top:4px;">'+fecha+' · '+por+'</div>';
+      card.onclick=(function(it){return function(){
+        var fields=[
+          ['w0-semana',it.Semana1_Num||it.Title],['w0-dem11',it.Semana1_Dem11],['w0-dem44',it.Semana1_Dem44],
+          ['w1-semana',it.Semana2_Num],['w1-dem11',it.Semana2_Dem11],['w1-dem44',it.Semana2_Dem44],
+          ['w2-semana',it.Semana3_Num],['w2-dem11',it.Semana3_Dem11],['w2-dem44',it.Semana3_Dem44]
+        ];
+        fields.forEach(function(pair){var el=document.getElementById(pair[0]);if(el&&pair[1]!=null) el.value=pair[1];});
+        WEEKS.forEach(function(w){calcWeek(w);});
+        document.getElementById('modal-historial').className='modal-overlay';
+        switchTab(3);
+        showToast('✓ Evaluación cargada correctamente');
+      };})(item);
+      list.appendChild(card);
+    });
+    list.style.display='flex'; list.style.flexDirection='column';
+  })
+  .catch(function(){
+    document.getElementById('historial-loading').style.display='none';
+    var err=document.getElementById('historial-error');
+    err.style.display='block'; err.textContent='Error al conectar con SharePoint.';
+  });
+};
+document.getElementById('btn-historial-cancel').onclick=function(){
+  document.getElementById('modal-historial').className='modal-overlay';
+};
+
+// ── TOAST ──────────────────────────────────────────────
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='block';
+  setTimeout(function(){t.style.display='none';},2500);
+}
+
+// ── COMPARTIR ──────────────────────────────────────────
+var ALL_FIELDS=[];
+WEEKS.forEach(function(w){
+  ['semana','dem11','dem44','hrs','esp-KBA','esp-XL','esp-10P'].forEach(function(f){ALL_FIELDS.push('w'+w+'-'+f);});
+  MACHINES.forEach(function(m){
+    ['mrd','ta','tb','tc'].forEach(function(f){ALL_FIELDS.push('w'+w+'-'+f+'-'+m.id);});
+    ALL_FIELDS.push('w'+w+'-unavail-'+m.id);
+  });
+});
+window.compartir = function(){
+  var s={};
+  ALL_FIELDS.forEach(function(f){var el=document.getElementById(f);if(!el) return;s[f]=el.type==='checkbox'?(el.checked?'1':'0'):el.value;});
+  var url=window.location.href.split('?')[0]+'?'+new URLSearchParams(s).toString();
+  navigator.clipboard.writeText(url).then(function(){showToast('✓ Link copiado al portapapeles');});
+};
+
+// ── CLOCK ──────────────────────────────────────────────
+function updateClock(){
+  var n=new Date();
+  document.getElementById('clock').textContent=n.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ── INIT ───────────────────────────────────────────────
+WEEKS.forEach(function(w){buildWeekPanel(w);});
+
+(function(){
+  var params=new URLSearchParams(window.location.search);
+  if([...params].length>0){
+    var s={};
+    params.forEach(function(v,k){s[k]=v;});
+    setTimeout(function(){
+      ALL_FIELDS.forEach(function(f){var el=document.getElementById(f);if(!el||s[f]==null) return;if(el.type==='checkbox') el.checked=s[f]==='1'; else el.value=s[f];});
+      WEEKS.forEach(function(w){calcWeek(w);});
+    },200);
+  } else {
+    WEEKS.forEach(function(w){calcWeek(w);});
+  }
+})();
+
+updateClock();
+setInterval(updateClock,10000);
+</script>
+</body>
+</html>
